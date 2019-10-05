@@ -12,7 +12,7 @@ from email.mime.multipart import MIMEMultipart
 
 def SendMail(ImgFileName, To):
 
-    From = "your email here"
+    From = "jimcoulter85@gmail.com"
     Password = "your password here"
     Subject = "subject goes here"
     Body = "text body goes here"

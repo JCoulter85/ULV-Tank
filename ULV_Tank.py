@@ -22,7 +22,7 @@ RASPICAM_OFF = "sudo killall -9 gst-launch-1.0"
 PHOTOS_DIR = "/home/pi/Desktop/Tank_photos" # save photos to a any directory
 SNAP_PHOTO = "raspistill -w 1920 -h 1080 -t 500 -o " + PHOTOS_DIR + "/"
 IMAGE_NUMBERS_TXT_FILE = "image_numbers.txt" # text file to append number to 'image.jpg'
-EMAIL_TO = "someone@gmail.com"
+EMAIL_TO = "jimcoulter85@gmail.com"
 
 pygame.init()
 pygame.joystick.init()
