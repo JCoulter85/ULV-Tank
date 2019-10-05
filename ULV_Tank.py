@@ -245,7 +245,7 @@ def emailPic(email):
 
     file_name = takePic(getFileName(IMAGE_NUMBERS_TXT_FILE))
     os.system("/home/pi/email_attach.py " + PHOTOS_DIR + file_name + " " + email + "&")
-    print file_name + " emailed to " + email
+    print (file_name) + " emailed to " + email
 
 def headLights(lights):
     if lights == 0:
@@ -347,7 +347,7 @@ def quit():
     stopAll()
     GPIO.output(HEAD_LIGHTS, 0)
     os.system(RASPICAM_OFF)
-    print "ULV-Observation Powering Down"
+    print ("ULV-Observation Powering Down")
 
 main()
 quit()
