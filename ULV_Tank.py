@@ -16,14 +16,13 @@ import os
 import sys
 from pygame.locals import *
 
-IP_ADDRESS = "10.0.0.125"  # ip address of host used for video stream
+IP_ADDRESS = "192.168.0.2" # ip address of host used for video stream
 RASPICAM_ON = "raspivid -t 999999 -w 1280 -h 720 -sa -50 -br 60 -co 20 -fps 24 -b 3000000 -o - | gst-launch-1.0 -e -vvv fdsrc ! h264parse ! rtph264pay pt=96 config-interval=5 ! udpsink host=" + IP_ADDRESS + " port=8160&"
 RASPICAM_OFF = "sudo killall -9 gst-launch-1.0"
-PHOTOS_DIR = "/home/pi/Desktop/Tank_photos"  # save photos to a any directory
+PHOTOS_DIR = "/home/pi/Desktop/Tank_photos" # save photos to a any directory
 SNAP_PHOTO = "raspistill -w 1920 -h 1080 -t 500 -o " + PHOTOS_DIR + "/"
-# text file to append number to 'image.jpg'
-IMAGE_NUMBERS_TXT_FILE = "image_numbers.txt"
-EMAIL_TO = "jimcoulter85@gmail.com"
+IMAGE_NUMBERS_TXT_FILE = "image_numbers.txt" # text file to append number to 'image.jpg'
+EMAIL_TO = "someone@gmail.com"
 
 pygame.init()
 pygame.joystick.init()
@@ -33,17 +32,17 @@ try:
 except:
     pass
 screen = pygame.display.set_mode((240, 240))
-pygame.display.set_caption('ULV-Obersvation')
+pygame.display.set_caption('Frank the Tank')
 
 """this sets up the GPIO pins (GPIO.BOARD) to be used
 with a TB6612FNG motor controller as labeled"""
-AIN1 = 3  # left side motor
-AIN2 = 5  # left side motor
-BIN1 = 8  # right side motor
-BIN2 = 10  # right side motor
-PWMA = 11  # left side PWM
-PWMB = 12  # right side PWM
-STBY = 7  # standby pin
+AIN1 = 3 # left side motor
+AIN2 = 5 # left side motor
+BIN1 = 8 # right side motor
+BIN2 = 10 # right side motor
+PWMA = 11 # left side PWM
+PWMB = 12 # right side PWM
+STBY = 7 # standby pin
 
 HEAD_LIGHTS = 13
 speed = 50
@@ -67,22 +66,19 @@ PWM_B = GPIO.PWM(PWMB, 100)
 PWM_A.start(0)
 PWM_B.start(0)
 
-
 def stopAll():
     GPIO.output(AIN1, 0)
     GPIO.output(AIN2, 0)
     GPIO.output(BIN1, 0)
     GPIO.output(BIN2, 0)
 
-
 def moveFwd(speed):
-    PWM_A.ChangeDutyCycle(int(speed * .95))  # calibrated to drive straight
+    PWM_A.ChangeDutyCycle(int(speed * .95)) #calibrated to drive straight
     PWM_B.ChangeDutyCycle(speed)
     GPIO.output(AIN1, 1)
     GPIO.output(AIN2, 0)
     GPIO.output(BIN1, 1)
     GPIO.output(BIN2, 0)
-
 
 def moveBack(speed):
     PWM_A.ChangeDutyCycle(speed)
@@ -92,7 +88,6 @@ def moveBack(speed):
     GPIO.output(BIN1, 0)
     GPIO.output(BIN2, 1)
 
-
 def turnLeft(speed):
     PWM_A.ChangeDutyCycle(speed)
     PWM_B.ChangeDutyCycle(speed)
@@ -100,7 +95,6 @@ def turnLeft(speed):
     GPIO.output(AIN2, 0)
     GPIO.output(BIN1, 1)
     GPIO.output(BIN2, 0)
-
 
 def turnRight(speed):
     PWM_A.ChangeDutyCycle(speed)
@@ -110,7 +104,6 @@ def turnRight(speed):
     GPIO.output(BIN1, 0)
     GPIO.output(BIN2, 0)
 
-
 def pivotLeft(speed):
     PWM_A.ChangeDutyCycle(speed)
     PWM_B.ChangeDutyCycle(speed)
@@ -118,7 +111,6 @@ def pivotLeft(speed):
     GPIO.output(AIN2, 1)
     GPIO.output(BIN1, 1)
     GPIO.output(BIN2, 0)
-
 
 def pivotRight(speed):
     PWM_A.ChangeDutyCycle(speed)
@@ -128,18 +120,17 @@ def pivotRight(speed):
     GPIO.output(BIN1, 0)
     GPIO.output(BIN2, 1)
 
-
 def leftTrack(speed):
     """sets GPIO pins to drive left motor either fwd
     or rev depending on the value input from
     joystick axis"""
 
-    if speed < -.2:  # left track fwd
+    if speed < -.2: # left track fwd
         PWM_A.ChangeDutyCycle(speed * -95)
         GPIO.output(AIN1, 1)
         GPIO.output(AIN2, 0)
 
-    elif speed > .2:  # left track rev
+    elif speed > .2: # left track rev
         PWM_A.ChangeDutyCycle(speed * 100)
         GPIO.output(AIN1, 0)
         GPIO.output(AIN2, 1)
@@ -148,18 +139,17 @@ def leftTrack(speed):
         GPIO.output(AIN1, 0)
         GPIO.output(AIN2, 0)
 
-
 def rightTrack(speed):
     """sets GPIO pins to drive right motor either fwd
     or rev depending on the value input from
     joystick axis"""
 
-    if speed < -.2:  # right track fwd
+    if speed < -.2: # right track fwd
         PWM_B.ChangeDutyCycle(speed * -100)
         GPIO.output(BIN1, 1)
         GPIO.output(BIN2, 0)
 
-    elif speed > .2:  # right track rev
+    elif speed > .2: # right track rev
         PWM_B.ChangeDutyCycle(speed * 100)
         GPIO.output(BIN1, 0)
         GPIO.output(BIN2, 1)
@@ -168,59 +158,55 @@ def rightTrack(speed):
         GPIO.output(BIN1, 0)
         GPIO.output(BIN2, 0)
 
-
 def getSpeedLeft(axis0, axis1):
     """returns a float from -1.0 to 1.0 using joystick position"""
 
-    if axis1 <= 0 and axis0 <= 0:  # upper left js quadrant
+    if axis1 <= 0 and axis0 <= 0: # upper left js quadrant
         speed_left = axis1 - axis0
-    elif axis1 <= 0 and axis0 >= 0:  # upper right js quadrant
+    elif axis1 <= 0 and axis0 >= 0: # upper right js quadrant
         if abs(axis1) > abs(axis0):
             speed_left = axis1
         else:
             speed_left = -axis0
-    elif axis1 >= 0 and axis0 <= 0:  # lower left js quadrant
+    elif axis1 >= 0 and axis0 <= 0: # lower left js quadrant
         if abs(axis1) > abs(axis0):
             speed_left = axis1
         else:
             speed_left = -axis0
-    elif axis1 >= 0 and axis0 >= 0:  # lower right js quadrant
+    elif axis1 >= 0 and axis0 >= 0: # lower right js quadrant
         speed_left = axis1 - axis0
     else:
         speed_left = 0
 
     return(speed_left)
 
-
 def getSpeedRight(axis0, axis1):
     """returns a float from -1.0 to 1.0 using joystick position"""
 
-    if axis1 <= 0 and axis0 >= 0:  # upper right js quadrant
+    if axis1 <= 0 and axis0 >= 0: # upper right js quadrant
         speed_right = axis1 + axis0
-    elif axis1 <= 0 and axis0 <= 0:  # upper left js quadrant
+    elif axis1 <= 0 and axis0 <= 0: # upper left js quadrant
         if abs(axis1) > abs(axis0):
             speed_right = axis1
         else:
             speed_right = axis0
-    elif axis1 >= 0 and axis0 >= 0:  # lower right js quadrant
+    elif axis1 >= 0 and axis0 >= 0: # lower right js quadrant
         if abs(axis1) > abs(axis0):
             speed_right = axis1
         else:
             speed_right = axis0
-    elif axis1 >= 0 and axis0 <= 0:  # lower left js quadrant
+    elif axis1 >= 0 and axis0 <= 0: # lower left js quadrant
         speed_right = axis1 + axis0
     else:
         speed_right = 0
 
     return(speed_right)
 
-
 def dualShock(axis0, axis1):
     '''values passed from joystick axes are used for speed'''
 
     leftTrack(getSpeedLeft(axis0, axis1))
     rightTrack(getSpeedRight(axis0, axis1))
-
 
 def getFileNum(txt_file):
     """returns a sequential number that reads and writes to
@@ -241,13 +227,11 @@ def getFileNum(txt_file):
 
     return number
 
-
 def getFileName(txt_file):
     """returns a sequential file name to photos taken"""
 
     number = str(getFileNum(txt_file))
     return "image_" + number + ".jpg"
-
 
 def takePic(file_name):
 
@@ -257,14 +241,11 @@ def takePic(file_name):
     os.system(RASPICAM_ON)
     return file_name
 
-
 def emailPic(email):
 
     file_name = takePic(getFileName(IMAGE_NUMBERS_TXT_FILE))
-    os.system("/home/pi/email_attach.py " +
-              PHOTOS_DIR + file_name + " " + email + "&")
-    print(file_name) + " emailed to " + email
-
+    os.system("/home/pi/email_attach.py " + PHOTOS_DIR + file_name + " " + email + "&")
+    print file_name + " emailed to " + email
 
 def headLights(lights):
     if lights == 0:
@@ -276,7 +257,6 @@ def headLights(lights):
 
     return lights
 
-
 MOVE_IT = {
     119: moveFwd,
     115: moveBack,
@@ -284,7 +264,7 @@ MOVE_IT = {
     100: turnRight,
     113: pivotLeft,
     101: pivotRight
-}
+    }
 
 SPEED = {
     49: 25,
@@ -296,8 +276,7 @@ SPEED = {
     55: 80,
     56: 90,
     57: 100
-}
-
+    }
 
 def main():
     '''the main loop can be toggled between joystick and keyboard
@@ -330,7 +309,7 @@ def main():
                         running = False
                     elif event.key == K_ESCAPE:
                         stop = True
-
+            
         stopAll()
 
         running = True
@@ -341,23 +320,22 @@ def main():
                 break
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:
-                    if event.key in MOVE_IT:  # keys <w> <a> <s> <d>
+                    if event.key in MOVE_IT: # keys <w> <a> <s> <d>
                         MOVE_IT[event.key](speed)
-                    elif event.key == 102:  # key <f>
+                    elif event.key == 102: # key <f>
                         lights = headLights(lights)
-                    elif event.key in SPEED:  # keys <1 - 9>
+                    elif event.key in SPEED: # keys <1 - 9>
                         speed = SPEED[event.key]
-                    elif event.key == 99:  # key <c>
+                    elif event.key == 99: # key <c>
                         takePic(getFileName(IMAGE_NUMBERS_TXT_FILE))
-                    elif event.key == 118:  # key <v>
+                    elif event.key == 118: # key <v>
                         emailPic(EMAIL_TO)
-                    elif event.key == 32:  # key <space>
+                    elif event.key == 32: # key <space>
                         running = False
-                    elif event.key == K_ESCAPE:  # key <escape>
+                    elif event.key == K_ESCAPE: # key <escape>
                         stop = True
                 elif event.type == pygame.KEYUP:
                     stopAll()
-
 
 def quit():
     """shuts down all running components of program"""
@@ -369,8 +347,7 @@ def quit():
     stopAll()
     GPIO.output(HEAD_LIGHTS, 0)
     os.system(RASPICAM_OFF)
-    print("ULV-Observation Powering Down")
-
+    print "Goodbye!"
 
 main()
 quit()
